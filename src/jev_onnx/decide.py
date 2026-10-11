@@ -16,7 +16,11 @@ graph.  No tokenizer, no vocabulary file and no PyTorch at inference time: the
             "urgency": ["low", "high"],
         },
     )
-    # {'intent': 'refund_request', 'urgency': 'high'}
+    # {'intent': 'order_status', 'urgency': 'low'}
+
+The graph itself, with no SDK, takes ``content`` / ``head_text`` / ``label_text``
+string tensors and returns raw ``logits [B, N]``. See the README for that
+contract and for how it differs from this wrapper.
 """
 
 from __future__ import annotations
