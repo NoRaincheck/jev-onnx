@@ -46,7 +46,12 @@ def evaluate(model, loader, device) -> dict:
             pred = masked.argmax(dim=-1)
 
             truth = pair_target.argmax(dim=0)
-            correct += int((pred == truth).sum())
+            # `truth` is per *candidate column*; `pred` is per *row*. Pick each
+            # row's own highest-target column before comparing, otherwise the
+            # two index different axes and the accuracy is meaningless.
+            per_row_target = pair_target.unsqueeze(0) * same.to(pair_target.dtype)
+            truth_per_row = per_row_target.argmax(dim=-1)  # [B] column index
+            correct += int((pred == truth_per_row).sum())
             total += b
             # soft_classification_loss already averages over the batch's rows;
             # recover the per-row sum so the running average matches train_loss.
