@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 import torch
 
-from jev_onnx.data import label_text
 from jev_onnx.decide import JevDecide
 from jev_onnx.export_onnx import export_to_onnx
 from jev_onnx.model import JevDualEncoder
