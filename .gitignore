@@ -11,7 +11,9 @@ wheels/
 
 # Training / export artifacts (regenerate with `python -m jev_onnx.train`)
 artifacts/
+artifacts_potion/
 artifacts_smoke/
+artifacts_smoke_potion/
 *.onnx
 *.pt
 *.ckpt

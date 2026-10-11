@@ -11,12 +11,13 @@ from __future__ import annotations
 import json
 import math
 import random
+from collections import Counter
 from dataclasses import dataclass
 
 import torch
 from torch.utils.data import Dataset
 
-from .tokenization import LABEL_SEPARATOR, PAD_ID, Vocab
+from .tokenization import LABEL_SEPARATOR, PAD_ID, Vocab, ort_split
 
 HF_DATASET = "ZefanCai/Open-Jev"
 
@@ -169,15 +170,42 @@ def load_examples(
     return out
 
 
+def corpus_texts(examples: list[Example]) -> list[str]:
+    """Every string the graph will tokenise: content, plus each candidate pair.
+
+    Single definition of "what the vocabulary is built over", shared by
+    ``build_vocabulary`` and by the potion-pretrained variant's frequency filter.
+    """
+    texts: list[str] = []
+    for ex in examples:
+        texts.append(ex.content)
+        for option in ex.options:
+            texts.append(label_text(ex.question, option))
+    return texts
+
+
+def token_coverage(examples: list[Example], vocab: Vocab) -> tuple[float, float]:
+    """How much of the corpus this vocabulary can actually represent.
+
+    Returns ``(token_mass, types)``: the share of *token occurrences* that land
+    on a real index, and the share of distinct types. Token mass is the number
+    that matters -- everything else falls to index 0, which the encoder masks
+    out, so it is silently dropped context.
+    """
+    counts: Counter[str] = Counter()
+    for text in corpus_texts(examples):
+        counts.update(ort_split(text))
+    total = sum(counts.values())
+    if total == 0:
+        return 0.0, 0.0
+    known = sum(n for tok, n in counts.items() if tok in vocab)
+    return known / total, sum(1 for tok in counts if tok in vocab) / len(counts)
+
+
 def build_vocabulary(
     examples: list[Example],
     min_freq: int = 5,
     max_size: int = 32_000,
 ) -> Vocab:
     """Count over everything the graph will ever tokenise: content and labels."""
-    texts: list[str] = []
-    for ex in examples:
-        texts.append(ex.content)
-        for option in ex.options:
-            texts.append(label_text(ex.question, option))
-    return Vocab.build(texts, min_freq=min_freq, max_size=max_size)
+    return Vocab.build(corpus_texts(examples), min_freq=min_freq, max_size=max_size)

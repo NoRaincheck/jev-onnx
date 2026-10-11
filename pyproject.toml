@@ -10,6 +10,10 @@ dependencies = [
     "onnxruntime>=1.20",
     "numpy>=2.0",
     "datasets>=3.0",
+    # Only used to download the pretrained embedding table in `jev_onnx.potion`.
+    # Already a transitive dependency of `datasets`; named explicitly because we
+    # import it directly.
+    "huggingface_hub>=0.24",
 ]
 
 [project.optional-dependencies]

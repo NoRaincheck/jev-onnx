@@ -15,6 +15,7 @@ does. Run any of them directly to reproduce a finding:
 | `probe_data_scopes.py` | how much of the corpus is prose vs structured, per config and split |
 | `probe_structured_states.py` | what the structured states contain (emails, transcripts, telemetry) |
 | `probe_lengths.py` | token-length distributions that set `max_len` / `max_label_len` |
+| `probe_potion_coverage.py` | how much of `potion-base-8M`'s `vocab.txt` a whitespace `StringSplit` can ever hit, what token mass each vocabulary covers on Open-Jev, and what the uncovered mass actually is |
 
 ```bash
 uv run python scripts/probe_op_support.py
