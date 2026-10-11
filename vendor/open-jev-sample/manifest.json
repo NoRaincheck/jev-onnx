@@ -1,0 +1,312 @@
+{
+  "source": "ZefanCai/Open-Jev",
+  "revision": "c67699e13d0ae25e35b77165a4b6b079bedc8aba",
+  "license": "cc0-1.0",
+  "seed": 20240617,
+  "budget": {
+    "train": 400,
+    "validation": 200,
+    "test": 200,
+    "ood": 200
+  },
+  "configs": [
+    "release-v2-redistributable",
+    "browser-drone-expansion-v1-redistributable",
+    "citation-control-v1",
+    "entity-alignment-control-v1",
+    "amount-extraction-control-v1",
+    "email-selection-control-v1",
+    "phone-extraction-control-v1",
+    "context-retention-control-v1",
+    "sponsor-segment-control-v1",
+    "silent-failure-control-v1",
+    "ir-control-v1",
+    "mailroom-control-v1"
+  ],
+  "files": {
+    "release-v2-redistributable/train": {
+      "rows": 34,
+      "bytes": 8584,
+      "sha256": "678709e8d4ee21d35ffffaf6b02477b09e980680f527d263b3d1e2b9e69815e4"
+    },
+    "browser-drone-expansion-v1-redistributable/train": {
+      "rows": 34,
+      "bytes": 8584,
+      "sha256": "678709e8d4ee21d35ffffaf6b02477b09e980680f527d263b3d1e2b9e69815e4"
+    },
+    "citation-control-v1/train": {
+      "rows": 20,
+      "bytes": 11457,
+      "sha256": "962c1ccd53854cf7a2c35bba7de6e54605f24e1d63973cdd303426311ffb59a3"
+    },
+    "entity-alignment-control-v1/train": {
+      "rows": 34,
+      "bytes": 18216,
+      "sha256": "2e38886b0853e747f53e6531f8ee626dc643308702522ea2dda5bac5d35f5e3e"
+    },
+    "amount-extraction-control-v1/train": {
+      "rows": 33,
+      "bytes": 22572,
+      "sha256": "ea355450ed7d41b9f59dfc80c6492adc5bad7b80896b7ea2ac3b401c9105450e"
+    },
+    "email-selection-control-v1/train": {
+      "rows": 27,
+      "bytes": 18384,
+      "sha256": "f9c91e393488f74994a6969f7d2520bc1671d3291ddec16c04170b2edafb1b58"
+    },
+    "phone-extraction-control-v1/train": {
+      "rows": 33,
+      "bytes": 20808,
+      "sha256": "4fb263e8cfafeda3a2cbe6bdb726ff9fb6903b8df6118eb86d9c07f56f6f90a2"
+    },
+    "context-retention-control-v1/train": {
+      "rows": 18,
+      "bytes": 19846,
+      "sha256": "b9b460801fb18fa79d97e31c8891b87da2a27602e5b025c85965b6c552ea7e09"
+    },
+    "sponsor-segment-control-v1/train": {
+      "rows": 27,
+      "bytes": 14959,
+      "sha256": "f45d8efb00c41261cca015852062e8babc6318db4dea9efc43b3445458a36406"
+    },
+    "silent-failure-control-v1/train": {
+      "rows": 24,
+      "bytes": 9490,
+      "sha256": "390c64323487b25d67db4525d94f4bca2974ca619c1eaea67971f0ae61ac5728"
+    },
+    "ir-control-v1/train": {
+      "rows": 33,
+      "bytes": 9519,
+      "sha256": "e2c525f4b09e6d043eaab65248fa76db3995093a60e8a77aa6b1ff02aa360af4"
+    },
+    "mailroom-control-v1/train": {
+      "rows": 33,
+      "bytes": 9278,
+      "sha256": "d45beb7014291e57c481efde1d0d025e7866f3915142569785a35331bf902a97"
+    },
+    "release-v2-redistributable/validation": {
+      "rows": 17,
+      "bytes": 9126,
+      "sha256": "05b80f06bf3c370b9f742fb9f6cd90c59db27ae0316295ec273cca9865527b73"
+    },
+    "browser-drone-expansion-v1-redistributable/validation": {
+      "rows": 17,
+      "bytes": 9822,
+      "sha256": "4c030be3fd3333d17eeba74dd5bedfeba8126f08fe99821a70e8ed446a95ef70"
+    },
+    "citation-control-v1/validation": {
+      "rows": 17,
+      "bytes": 10703,
+      "sha256": "734d9d29dff9682f9bbbad2d78f288bdc401d86b830e3c2aaaa107f4985fd294"
+    },
+    "entity-alignment-control-v1/validation": {
+      "rows": 17,
+      "bytes": 17984,
+      "sha256": "d3c3dbe4a200faddc19e310df3fdf404c4cdaece928f24eaba8d775a4ef74ef6"
+    },
+    "amount-extraction-control-v1/validation": {
+      "rows": 17,
+      "bytes": 22195,
+      "sha256": "bdb4a62f862a90004a050c71b077d07a82cf0d2b8967527ee78f6c64d570fdcd"
+    },
+    "email-selection-control-v1/validation": {
+      "rows": 17,
+      "bytes": 19896,
+      "sha256": "93c01d925539a6eb849ace20fcb85135b3e3ff5a27195fa58d5e07acbf1119e4"
+    },
+    "phone-extraction-control-v1/validation": {
+      "rows": 17,
+      "bytes": 20333,
+      "sha256": "564d2aa4f59fbc441e35db93e8113f6b1f23663ad8f503b6e9aff3f161219c0a"
+    },
+    "context-retention-control-v1/validation": {
+      "rows": 17,
+      "bytes": 19889,
+      "sha256": "29943a4dfc56f90d5be4d48fb1707021a2df666d395776b345b9f9e3185dd439"
+    },
+    "sponsor-segment-control-v1/validation": {
+      "rows": 16,
+      "bytes": 14500,
+      "sha256": "cce9b50557e13943e7e8ad673cc8bf0ea6fa143bf3a85fbb44901155bc1c0c24"
+    },
+    "silent-failure-control-v1/validation": {
+      "rows": 16,
+      "bytes": 8580,
+      "sha256": "5a84c75fcc79e354e228dab41b7d5849c911635410adffc1a343e478b2ff4d0c"
+    },
+    "ir-control-v1/validation": {
+      "rows": 16,
+      "bytes": 6383,
+      "sha256": "67d228de7799681067cac5d4df70ad115120b206c93f4913d0f369f6bd298d22"
+    },
+    "mailroom-control-v1/validation": {
+      "rows": 16,
+      "bytes": 8853,
+      "sha256": "a35b599b5480fc48e7e2cceca75d46016814e45ca1812408922dc6c7100cc430"
+    },
+    "release-v2-redistributable/test": {
+      "rows": 16,
+      "bytes": 7584,
+      "sha256": "27983584d972aee27f04d82cc17e043478436ab6f4e84943bfda7ff2a7a32af5"
+    },
+    "browser-drone-expansion-v1-redistributable/test": {
+      "rows": 16,
+      "bytes": 7415,
+      "sha256": "f72e913ec1e9ae65a2dd527511b281a9304e4f2d19e408408bff0767bbf4633e"
+    },
+    "citation-control-v1/test": {
+      "rows": 17,
+      "bytes": 10913,
+      "sha256": "0bc87a66661007156556bd5e8a5d7a1ca075e9a6d11fb257ccf0b3fffacb208b"
+    },
+    "entity-alignment-control-v1/test": {
+      "rows": 17,
+      "bytes": 17995,
+      "sha256": "68f09099af088503291530a2a62f51825c648d435c90ce34ae3200df41bcbd28"
+    },
+    "amount-extraction-control-v1/test": {
+      "rows": 17,
+      "bytes": 22191,
+      "sha256": "aa984ec1ddf9d5a0f1578e018f26603af9bd62f7c0b652bf8731c035f196de37"
+    },
+    "email-selection-control-v1/test": {
+      "rows": 17,
+      "bytes": 19177,
+      "sha256": "bf08f7b32c39bb2dad23e78eaf6ae87a48af42436fe0c42c00322caa57835df2"
+    },
+    "phone-extraction-control-v1/test": {
+      "rows": 17,
+      "bytes": 20300,
+      "sha256": "54304fdb53cd803db19de77bbd85ef5c7b9773bab70a17ae60fb648522c6e323"
+    },
+    "context-retention-control-v1/test": {
+      "rows": 17,
+      "bytes": 19846,
+      "sha256": "1fc3587402ab33d609723ffa2cb24bb2dc4fbaf2c10a07d13e6cbd7fcd7f10fc"
+    },
+    "sponsor-segment-control-v1/test": {
+      "rows": 16,
+      "bytes": 14402,
+      "sha256": "0c210272a49cd4d49de150c178671e2ae898c1e399657adb4c81e9bb5fec1d16"
+    },
+    "silent-failure-control-v1/test": {
+      "rows": 16,
+      "bytes": 8924,
+      "sha256": "ef1caaa584846ee910a478f7dff1a9b0f21354c7844257455b521f92b5939ede"
+    },
+    "ir-control-v1/test": {
+      "rows": 16,
+      "bytes": 6312,
+      "sha256": "5fbb599757ea1cc2d061a8642310f720033bd45d4c4c1a8ca91d1f6e94408dfe"
+    },
+    "mailroom-control-v1/test": {
+      "rows": 16,
+      "bytes": 8687,
+      "sha256": "5bb630f077b8d33255ec28ad1ec734028dbf5f6bfd9cb8eab650d3abba2bd06e"
+    },
+    "release-v2-redistributable/ood": {
+      "rows": 15,
+      "bytes": 6660,
+      "sha256": "0658712c3435729b9a6e027e86de14a2c3fba2ba8bb9dc3459ae90819bf77c09"
+    },
+    "browser-drone-expansion-v1-redistributable/ood": {
+      "rows": 15,
+      "bytes": 6582,
+      "sha256": "195c5db791d5dd918f2a3804aa4b275fa2e63e5bc7edeb7dbe0bcf00900a4dd0"
+    },
+    "citation-control-v1/ood": {
+      "rows": 17,
+      "bytes": 10196,
+      "sha256": "370a2d655095f8e82fbb3b0eaf8decd87d8f4714925ccd94a0bff1a923ededea"
+    },
+    "entity-alignment-control-v1/ood": {
+      "rows": 17,
+      "bytes": 18587,
+      "sha256": "6ee8d7fae3a46bcbdcbc9e6ffaac457f51f1c43a07fd59e315b389588f3ca4d9"
+    },
+    "amount-extraction-control-v1/ood": {
+      "rows": 17,
+      "bytes": 22421,
+      "sha256": "97d29b698210cbdb748f4be5d4fd9ad9c0d8606fa25fc8d7277e92656b7371cf"
+    },
+    "email-selection-control-v1/ood": {
+      "rows": 17,
+      "bytes": 19864,
+      "sha256": "06f5c4333545fdfe8b2f3b86355e17ebfee3614620b4e9ddb0ec8b2c210af412"
+    },
+    "phone-extraction-control-v1/ood": {
+      "rows": 17,
+      "bytes": 20582,
+      "sha256": "3a066bdefafd192220f3f79350fa8bd1f852acb150f7cc04c0b356cef0821670"
+    },
+    "context-retention-control-v1/ood": {
+      "rows": 17,
+      "bytes": 22019,
+      "sha256": "82320df8cf3d04e32ed20920a0254e831d56417c616707d8f64414254c1e7b22"
+    },
+    "sponsor-segment-control-v1/ood": {
+      "rows": 16,
+      "bytes": 15205,
+      "sha256": "dc9cd6524458eedacd7d3e64d7fd1697df43c9145d0c493dc725b0764b71fe6b"
+    },
+    "silent-failure-control-v1/ood": {
+      "rows": 16,
+      "bytes": 9117,
+      "sha256": "d243dc792fe08799954686f7b8524ff1bc1b5588e4e71bccd660b93fce18e550"
+    },
+    "ir-control-v1/ood": {
+      "rows": 16,
+      "bytes": 6576,
+      "sha256": "4eb47b83e7640bd1f512c448b7266fc86078115d9302ec5ef4d9afeec6c13699"
+    },
+    "mailroom-control-v1/ood": {
+      "rows": 16,
+      "bytes": 8842,
+      "sha256": "63c69f42a9e6f5dd3552f0224f1ddac6f8814f42922b7bd51afe3e6663023b59"
+    }
+  },
+  "totals": {
+    "train": 350,
+    "validation": 200,
+    "test": 198,
+    "ood": 196,
+    "all": 944
+  },
+  "sliced_cells": [
+    "entity-alignment-control-v1/train",
+    "amount-extraction-control-v1/train",
+    "phone-extraction-control-v1/train",
+    "ir-control-v1/train",
+    "mailroom-control-v1/train",
+    "citation-control-v1/validation",
+    "entity-alignment-control-v1/validation",
+    "amount-extraction-control-v1/validation",
+    "email-selection-control-v1/validation",
+    "phone-extraction-control-v1/validation",
+    "context-retention-control-v1/validation",
+    "sponsor-segment-control-v1/validation",
+    "silent-failure-control-v1/validation",
+    "ir-control-v1/validation",
+    "mailroom-control-v1/validation",
+    "citation-control-v1/test",
+    "entity-alignment-control-v1/test",
+    "amount-extraction-control-v1/test",
+    "email-selection-control-v1/test",
+    "phone-extraction-control-v1/test",
+    "context-retention-control-v1/test",
+    "sponsor-segment-control-v1/test",
+    "silent-failure-control-v1/test",
+    "ir-control-v1/test",
+    "mailroom-control-v1/test",
+    "citation-control-v1/ood",
+    "entity-alignment-control-v1/ood",
+    "amount-extraction-control-v1/ood",
+    "email-selection-control-v1/ood",
+    "phone-extraction-control-v1/ood",
+    "context-retention-control-v1/ood",
+    "sponsor-segment-control-v1/ood",
+    "silent-failure-control-v1/ood",
+    "ir-control-v1/ood",
+    "mailroom-control-v1/ood"
+  ]
+}

@@ -17,6 +17,15 @@ does. Run any of them directly to reproduce a finding:
 | `probe_lengths.py` | token-length distributions that set `max_len` / `max_label_len` |
 | `probe_potion_coverage.py` | how much of `potion-base-8M`'s `vocab.txt` a whitespace `StringSplit` can ever hit, what token mass each vocabulary covers on Open-Jev, and what the uncovered mass actually is |
 
+The probes read from the Hub (they need the full corpus to be meaningful).
+`build_sample.py` is the exception — it *writes* a vendored artefact rather than
+observing one:
+
+| script | what it does |
+|---|---|
+| `build_sample.py` | writes `vendor/open-jev-sample/` — the committed 942-row slice that makes every code path runnable offline. Deterministic; re-running reproduces the checksums in its `manifest.json` |
+
 ```bash
 uv run python scripts/probe_op_support.py
+uv run python scripts/build_sample.py     # regenerate the vendored slice
 ```

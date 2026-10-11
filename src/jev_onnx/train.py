@@ -74,6 +74,15 @@ def main(argv=None) -> Path:
     ap.add_argument("--weight-decay", type=float, default=0.01)
     ap.add_argument("--warmup-frac", type=float, default=0.05)
     ap.add_argument("--max-rows", type=int, default=None, help="subsample for a quick run")
+    ap.add_argument(
+        "--data",
+        choices=("hub", "sample", "auto"),
+        default="hub",
+        help="'hub' streams the full Open-Jev corpus from the Hub; "
+        "'sample' uses the committed ~1k-row slice under vendor/open-jev-sample "
+        "for an offline smoke run; 'auto' prefers the sample when it exists. "
+        "Metrics from 'sample' are not comparable to 'hub'",
+    )
     ap.add_argument("--min-freq", type=int, default=5)
     ap.add_argument("--max-vocab", type=int, default=32_000)
     ap.add_argument("--max-len", type=int, default=448)
@@ -98,9 +107,10 @@ def main(argv=None) -> Path:
     print("=" * 72)
     print("1/5  loading Open-Jev")
     print("=" * 72)
-    train_ex = load_examples("train", max_rows=args.max_rows, seed=args.seed)
+    print(f"  source     : {args.data}")
+    train_ex = load_examples("train", max_rows=args.max_rows, seed=args.seed, source=args.data)
     eval_ex = load_examples(
-        "validation", max_rows=args.eval_rows, seed=args.seed
+        "validation", max_rows=args.eval_rows, seed=args.seed, source=args.data
     )
     print(f"  train rows : {len(train_ex):,}")
     print(f"  eval rows  : {len(eval_ex):,}")

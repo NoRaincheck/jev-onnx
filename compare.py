@@ -123,6 +123,13 @@ def main() -> None:
     ap.add_argument("--split", default="validation")
     ap.add_argument("--rows", type=int, default=4000)
     ap.add_argument("--batch-size", type=int, default=32)
+    ap.add_argument(
+        "--data",
+        choices=("hub", "sample", "auto"),
+        default="hub",
+        help="'hub' streams the full Open-Jev corpus; 'sample' uses the committed "
+        "~1k-row slice for an offline smoke run",
+    )
     args = ap.parse_args()
 
     paths = [Path(p) for p in args.models]
@@ -139,8 +146,8 @@ def main() -> None:
             print(f"{DIM}skipping {p} (not built yet){RESET}")
 
     rule("loading held-out rows (identical for every model)")
-    examples = load_examples(args.split, max_rows=args.rows, seed=1234)
-    print(f"  split {args.split}, {len(examples):,} rows")
+    examples = load_examples(args.split, max_rows=args.rows, seed=1234, source=args.data)
+    print(f"  split {args.split}, {len(examples):,} rows (source={args.data})")
 
     results = [score_model(p, examples, args.batch_size) for p in present]
 

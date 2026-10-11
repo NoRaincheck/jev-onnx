@@ -69,6 +69,14 @@ def main(argv=None) -> dict:
     ap.add_argument("--split", default="validation")
     ap.add_argument("--rows", type=int, default=4000)
     ap.add_argument("--batch-size", type=int, default=32)
+    ap.add_argument(
+        "--data",
+        choices=("hub", "sample", "auto"),
+        default="hub",
+        help="'hub' streams the full Open-Jev corpus from the Hub; 'sample' uses "
+        "the committed ~1k-row slice under vendor/open-jev-sample for an offline "
+        "smoke run. Accuracy on the sample is NOT comparable to the Hub numbers",
+    )
     ap.add_argument("--providers", default=None)
     ap.add_argument("--out", default=None, help="write per-row JSON here")
     args = ap.parse_args(argv)
@@ -81,8 +89,8 @@ def main(argv=None) -> dict:
     vocab = load_vocab_for(args.model)
     print(f"vocab : {vocab.size:,} tokens (recovered from the graph)")
 
-    examples = load_examples(args.split, max_rows=args.rows, seed=1234)
-    print(f"rows  : {len(examples):,} from split={args.split}")
+    examples = load_examples(args.split, max_rows=args.rows, seed=1234, source=args.data)
+    print(f"rows  : {len(examples):,} from split={args.split} (source={args.data})")
     print()
 
     correct = total = 0

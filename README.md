@@ -47,8 +47,11 @@ whose entry point is a string tensor.
 uv venv && uv pip install -e .
 ```
 
-Train to rebuild the exported model (subsample with `--max-rows` for a quick
-pass). It is committed, so this is optional:
+Everything below runs on a fresh clone with no training and no download — the
+`.onnx` files, their vocabularies, the potion vectors and a 944-row slice of the
+training corpus are all committed.
+
+Train to rebuild the exported model. It is committed, so this is optional:
 
 ```bash
 python -m jev_onnx.train --max-rows 120000 --epochs 2
@@ -90,6 +93,10 @@ exactly what the graph exposes and what the SDK adds on top:
 * [The Python SDK](#the-python-sdk-jev_onnxdecide) — the `jev` schema and how it
   differs from the raw graph
 
+Training, data and evals are documented separately in
+**[TRAINING.md](TRAINING.md)** — the corpus, how a row becomes a training
+example, the training recipe, and how the eval numbers should be read.
+
 Run the tour:
 
 ```bash
@@ -113,8 +120,9 @@ python -m jev_onnx.evaluate --model artifacts/jev.onnx --split validation
 The chance baseline matters: Open-Jev heads carry 2–16 options, so a headline
 accuracy without it is not interpretable.
 
-Measured on the shipped `artifacts/jev.onnx` (3 epochs over 120k rows, ~11.5M
-parameters, on an M1 Max):
+Measured on the shipped `artifacts/jev.onnx` (3 epochs over ~89k rows, ~11.5M
+parameters, on an M1 Max — `--max-rows 120000` is a per-config quota that yields
+~89k rows; see [TRAINING.md](TRAINING.md#--max-rows-is-a-per-config-quota-not-a-cap)):
 
 | split | rows | top-1 | chance |
 |---|---|---|---|
@@ -441,7 +449,8 @@ sample's token mass.
 
 ### Measured
 
-Three models, one recipe (`--max-rows 120000 --epochs 3`, same seed, same loader,
+Three models, one recipe (`--max-rows 120000 --epochs 3` — ~89k rows, see
+[TRAINING.md](TRAINING.md#--max-rows-is-a-per-config-quota-not-a-cap) — same seed, same loader,
 same architecture, same tokenizer). The middle column is the pretrained first
 layer; the right column is the **control** — potion's word list with an `N(0,1)`
 table, i.e. the baseline recipe with a different vocabulary. Scored through
@@ -589,6 +598,10 @@ zero-shot: the label set is not baked in, so any taxonomy works at call time.
 
 ## The data
 
+**See [TRAINING.md](TRAINING.md) for the full treatment** — corpus layout, how a
+row becomes a training example, the training recipe, and how the evals are
+constructed and interpreted. In brief:
+
 ~95% of Open-Jev is structured, not prose. Each row's `state_json` is
 JSON-encoded — about 15k rows hold a plain string (support tickets, email
 bodies, transcripts) and ~331k hold an object. `data.render_content` passes
@@ -597,16 +610,29 @@ and the model still receives one plain string.
 
 Each row is one *decision*: content, question, candidate options, and a target
 distribution. Rows sharing a `group_id` are different decisions about the same
-content, which is exactly the multi-head shape the inference layer exposes.
+content, which is exactly the multi-head shape the inference layer exposes. No
+`group_id` crosses a split, so held-out numbers are not contaminated.
+
+A **944-row slice of the corpus is committed** under `vendor/open-jev-sample/`,
+covering all 12 configs × 4 splits, so the whole pipeline runs offline:
+
+```bash
+python -m jev_onnx.train --data sample --max-rows 400 --epochs 1 --out /tmp/smoke
+```
+
+`--data sample` is opt-in and never a silent fallback; metrics from it are not
+comparable to the Hub numbers above.
 
 ---
 
 ## Layout
 
 ```
+README.md              the graph, the inference API, the vocabulary experiments
+TRAINING.md            the corpus, training data construction, the recipe, evals
 src/jev_onnx/
   tokenization.py   ORT-mirroring tokenizer + Vocab      ← the train/serve contract
-  data.py           Open-Jev → examples, batching, soft targets
+  data.py           Open-Jev → examples, batching, soft targets, --data source
   model.py          the dual encoder and its loss
   train.py          training loop + export  (random first layer)
   train_potion.py   the same recipe with a pretrained first layer
@@ -623,21 +649,25 @@ tests/
   test_train_metrics.py      accuracy/loss bookkeeping
   test_potion.py             table/vocabulary alignment, same-graph guarantee
   test_data.py               corpus text enumeration and vocabulary coverage
+  test_open_jev_sample.py    the vendored slice: fidelity, split separation, offline
 scripts/                     probes that document why the code is shaped this way
 vendor/
   potion-base-8M/    upstream static vectors, verbatim. See its README for
                      checksums and license. `resolve()` prefers this directory
                      and falls back to the Hub
+  open-jev-sample/   944-row slice of Open-Jev (CC0), all 12 configs x 4 splits,
+                     so every code path runs offline. `--data sample`
 artifacts/                   the exported .onnx files and vocabularies
 artifacts_potion/
 ```
 
-The `.onnx` files, their `vocab.json` side-cars and the upstream potion vectors
-are all committed, so a fresh clone can run `python compare.py`, `python main.py`
-and `python demo.py` with no training and no download. Retrain them with the
-commands above; nothing in the tree depends on them being present.
+The `.onnx` files, their `vocab.json` side-cars, the upstream potion vectors and
+the Open-Jev slice are all committed, so a fresh clone can run `compare.py`,
+`main.py`, `demo.py` and a full smoke training run with no training and no
+download. Retrain the models with the commands above; nothing in the tree depends
+on them being present.
 
-96 tests, ~9 seconds:
+111 tests, ~22 seconds:
 
 ```bash
 python -m pytest tests/ -q

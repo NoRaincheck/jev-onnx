@@ -13,6 +13,7 @@ import math
 import random
 from collections import Counter
 from dataclasses import dataclass
+from pathlib import Path
 
 import torch
 from torch.utils.data import Dataset
@@ -20,9 +21,16 @@ from torch.utils.data import Dataset
 from .tokenization import LABEL_SEPARATOR, PAD_ID, Vocab, ort_split
 
 HF_DATASET = "ZefanCai/Open-Jev"
+HF_REVISION = "c67699e13d0ae25e35b77165a4b6b079bedc8aba"
 
 # Splits that exist only on the main config; the side configs are train-only.
 EVAL_SPLITS = ("validation", "test")
+
+# The committed ~1k-row slice of Open-Jev. Same `data/<config>/<split>-*.parquet`
+# layout as upstream, so the only thing `--data sample` changes is where the
+# bytes come from. `resolve_source` decides; see also
+# `scripts/build_sample.py`, which regenerates it.
+SAMPLE_DIR = Path(__file__).resolve().parents[2] / "vendor" / "open-jev-sample"
 
 
 def render_content(state_json: str) -> str:
@@ -126,28 +134,65 @@ def _pad(rows: list[list[int]], width: int) -> torch.Tensor:
 
 
 # --------------------------------------------------------------------- loading
+def resolve_source(source: str = "auto") -> str:
+    """Decide where Open-Jev rows come from: ``"hub"`` or ``"sample"``.
+
+    ``"sample"`` is the committed slice under ``vendor/open-jev-sample``. It is
+    opt-in rather than a silent fallback, because it is a different corpus and a
+    number measured on it is not comparable to one measured on the Hub. Asking
+    for it and not finding it is an error rather than a quiet upgrade, so a
+    typo can never quietly downgrade a training run.
+
+    ``"auto"`` prefers the vendored slice when it is present and falls back to
+    the Hub when it is not. It is not the default anywhere -- every entry point
+    defaults to ``"hub"``, so a real training run is never silently pointed at
+    the sample.
+    """
+    if source not in ("auto", "hub", "sample"):
+        raise ValueError(f"source must be auto/hub/sample, got {source!r}")
+    if source == "auto":
+        source = "sample" if SAMPLE_DIR.is_dir() else "hub"
+    if source == "sample" and not SAMPLE_DIR.is_dir():
+        raise FileNotFoundError(
+            f"--data sample requested but {SAMPLE_DIR} is missing.\n"
+            "  regenerate it with:  uv run python scripts/build_sample.py"
+        )
+    return source
+
+
 def load_examples(
     split: str = "train",
     configs: list[str] | None = None,
     max_rows: int | None = None,
     seed: int = 0,
+    source: str = "hub",
 ) -> list[Example]:
     """Load Open-Jev into examples, optionally subsampling for a faster run.
 
     When ``max_rows`` is set the quota is applied *before* the rows are
     rendered, so a quick run parses 40k rows rather than all ~346k.
-    """
-    from datasets import get_dataset_config_names, load_dataset
 
-    configs = configs or get_dataset_config_names(HF_DATASET)
+    The quota is per config (``ceil(max_rows / n_configs)``), so small configs
+    contribute all of their rows and large ones are sampled. A consequence worth
+    knowing: ``--max-rows 120000`` yields ~89k rows, not 120k, because the seven
+    configs smaller than the 10k quota are exhausted rather than padded.
+
+    ``source`` selects the corpus; see `resolve_source`.
+    """
+    from datasets import load_dataset
+
+    source = resolve_source(source)
+    if configs is None:
+        configs = _available_configs(source)
+
     rng = random.Random(seed)
     quota = None if max_rows is None else math.ceil(max_rows / len(configs))
 
     out: list[Example] = []
     for n_cfg, cfg in enumerate(configs, 1):
         try:
-            ds = load_dataset(HF_DATASET, cfg, split=split)
-        except ValueError:
+            ds = _load_split(source, cfg, split)
+        except (ValueError, FileNotFoundError):
             continue  # this config does not have the requested split
         take = len(ds) if quota is None else min(quota, len(ds))
         indices = rng.sample(range(len(ds)), take) if take < len(ds) else range(len(ds))
@@ -168,6 +213,45 @@ def load_examples(
     if max_rows is not None and max_rows < len(out):
         out = out[:max_rows]
     return out
+
+
+def _available_configs(source: str) -> list[str]:
+    """Config names, in a stable, source-appropriate order.
+
+    Order is load-bearing, not cosmetic: `load_examples` draws each config's
+    sample from one `random.Random(seed)` in sequence, so enumerating the same
+    configs in a different order yields a *different* set of rows for the same
+    seed. The Hub order is therefore taken exactly as
+    `get_dataset_config_names` returns it and is never sorted -- sorting it would
+    silently change every held-out number this project has published.
+
+    The sample cannot ask the Hub (that would defeat the point of vendoring it,
+    and offline the call returns a single config rather than failing), so it
+    reads the order recorded in its own manifest at build time.
+    """
+    if source == "sample":
+        manifest = SAMPLE_DIR / "manifest.json"
+        if manifest.is_file():
+            recorded = json.loads(manifest.read_text())["configs"]
+            present = {p.name for p in (SAMPLE_DIR / "data").iterdir() if p.is_dir()}
+            return [c for c in recorded if c in present]
+        return sorted(p.name for p in (SAMPLE_DIR / "data").iterdir() if p.is_dir())
+    from datasets import get_dataset_config_names
+
+    # Deliberately unsorted: see the docstring.
+    return list(get_dataset_config_names(HF_DATASET))
+
+
+def _load_split(source: str, config: str, split: str):
+    """One (config, split) as a `datasets.Dataset`, from the Hub or the sample."""
+    from datasets import load_dataset
+
+    if source == "sample":
+        # The sample keeps upstream's directory layout, so this is the same
+        # data_files glob the Hub reader resolves internally.
+        pattern = SAMPLE_DIR / "data" / config / f"{split}-*.parquet"
+        return load_dataset("parquet", data_files=str(pattern), split="train")
+    return load_dataset(HF_DATASET, config, split=split, revision=HF_REVISION)
 
 
 def corpus_texts(examples: list[Example]) -> list[str]:
