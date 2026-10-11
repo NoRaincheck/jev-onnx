@@ -1,0 +1,21 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Training / export artifacts (regenerate with `python -m jev_onnx.train`)
+artifacts/
+artifacts_smoke/
+*.onnx
+*.pt
+*.ckpt
+
+# Test / tool caches
+.pytest_cache/
+.ruff_cache/

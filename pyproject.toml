@@ -1,0 +1,27 @@
+[project]
+name = "jev-onnx"
+version = "0.1.0"
+description = "Pure-ONNX zero-shot JEV decision classifier: trains in vanilla PyTorch, runs on strings in onnxruntime."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "torch>=2.9",
+    "onnx>=1.17",
+    "onnxruntime>=1.20",
+    "numpy>=2.0",
+    "datasets>=3.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/jev_onnx"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: exhaustive checks that take tens of seconds"]
