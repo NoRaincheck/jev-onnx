@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import struct
+from pathlib import Path
 
 import numpy as np
 import onnx
@@ -33,6 +34,9 @@ from jev_onnx.tokenization import PAD_ID
 MAX_LEN = 32
 MAX_LABEL_LEN = 24
 D_MODEL = 32
+
+# Where the committed copy of the upstream weights lives.
+VENDOR_DIR = Path(__file__).resolve().parents[1] / "vendor" / "potion-base-8M"
 
 # A stand-in for vocab.txt: ordinary words, plus the three kinds of entry a
 # whitespace tokenizer can never emit.
@@ -335,6 +339,24 @@ def test_potion_graph_matches_pytorch(exported):
 
 
 # --------------------------------------------------------- the real artefact
+def test_resolve_prefers_the_vendored_copy():
+    """The committed copy under `vendor/` must win, with no network access.
+
+    A source checkout has it, so training and `compare.py` work offline; a wheel
+    does not, and `resolve` falls through to the Hub instead of failing. Both
+    files being on the Hub is what makes the committed copy safe to vendor: the
+    fallback is only unreachable, never unreachable *and* required.
+    """
+    from jev_onnx import potion
+
+    if not VENDOR_DIR.is_dir():
+        pytest.skip("vendor/potion-base-8M is not in this checkout")
+    paths = potion.resolve()
+    assert paths["vocab.txt"] == VENDOR_DIR / "vocab.txt"
+    assert paths["model.safetensors"] == VENDOR_DIR / "model.safetensors"
+    assert all(p.exists() for p in paths.values())
+
+
 @pytest.mark.slow
 def test_real_potion_repo_loads_and_is_semantic():
     """Needs the download; the one place the real vocabulary is exercised.

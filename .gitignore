@@ -9,12 +9,17 @@ wheels/
 # Virtual environments
 .venv
 
-# Training / export artifacts (regenerate with `python -m jev_onnx.train`)
-artifacts/
-artifacts_potion/
+# Throwaway runs from --max-rows smoke tests. The real artifacts are committed:
+# artifacts/            baseline  (python -m jev_onnx.train)
+# artifacts_potion/     potion    (python -m jev_onnx.train_potion)
+# vendor/potion-base-8M/ upstream static vectors, see vendor/*/README.md
+# so that `python compare.py` and `python main.py` work on a fresh clone with no
+# training and no download. Regenerate with the commands above; nothing else in
+# the tree is load-bearing for correctness.
 artifacts_smoke/
 artifacts_smoke_potion/
-*.onnx
+
+# Checkpoints. The .onnx files are the artefact of record and are tracked.
 *.pt
 *.ckpt
 

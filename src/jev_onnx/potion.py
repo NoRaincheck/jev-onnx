@@ -52,6 +52,12 @@ from .tokenization import Vocab, ort_split
 
 POTION_REPO = "minishlab/potion-base-8M"
 
+# A verbatim copy of the repo's two data files, committed under `vendor/` so the
+# demo runs without reaching for the Hub. `resolve()` prefers it when present.
+# Resolved relative to this file, which means it is found in a source checkout
+# and simply not found in an installed wheel -- in which case the Hub is used.
+VENDORED_DIR = Path(__file__).resolve().parents[2] / "vendor" / "potion-base-8M"
+
 # Weight tensor inside `model.safetensors`. Model2Vec saves exactly one.
 EMBEDDINGS_KEY = "embeddings"
 
@@ -64,16 +70,23 @@ DOWNLOAD_FILES = ("vocab.txt", "model.safetensors")
 
 # --------------------------------------------------------------------- loading
 def resolve(repo: str = POTION_REPO) -> dict[str, Path]:
-    """Fetch ``vocab.txt`` and ``model.safetensors`` once; return local paths.
+    """Locate ``vocab.txt`` and ``model.safetensors``, vendored copy first.
+
+    `vendor/potion-base-8M/` holds a byte-identical copy of both files, so a
+    clone of this repo trains and demos with no network access. Anything else --
+    another model2vec repo, or a wheel installed outside the source tree -- falls
+    through to ``huggingface_hub``, which caches, so it costs one download ever.
 
     ``huggingface_hub`` is already a transitive dependency of ``datasets``; it
     is used here for the download only and never at inference time.
     """
+    vendored = {name: VENDORED_DIR / name for name in DOWNLOAD_FILES}
+    if all(p.exists() for p in vendored.values()):
+        return vendored
+
     from huggingface_hub import hf_hub_download
 
-    return {
-        name: Path(hf_hub_download(repo, name)) for name in DOWNLOAD_FILES
-    }
+    return {name: Path(hf_hub_download(repo, name)) for name in DOWNLOAD_FILES}
 
 
 def read_safetensors(path: str | Path, key: str = EMBEDDINGS_KEY) -> np.ndarray:

@@ -47,18 +47,20 @@ whose entry point is a string tensor.
 uv venv && uv pip install -e .
 ```
 
-Train (subsample with `--max-rows` for a quick pass):
+Train to rebuild the exported model (subsample with `--max-rows` for a quick
+pass). It is committed, so this is optional:
 
 ```bash
 python -m jev_onnx.train --max-rows 120000 --epochs 2
 ```
 
 There is a second model with a *pretrained* first layer — same graph, same
-tokenizer, different embedding table. Train it alongside and compare:
+tokenizer, different embedding table. Both `.onnx` files are committed, so this
+works on a fresh clone:
 
 ```bash
-python -m jev_onnx.train_potion --max-rows 120000 --epochs 3   # -> artifacts_potion/
 python compare.py                                              # side by side
+python -m jev_onnx.train_potion --max-rows 120000 --epochs 3   # to rebuild it
 ```
 
 See [Two models, one graph](#two-models-one-graph).
@@ -399,9 +401,12 @@ imports, and the same `(content [B], head_text [N], label_text [N]) -> logits
 contextual passes, 30 MB of `float32`.
 
 1. **Read.** `vocab.txt` (line *i* names vector *i*) and the single `embeddings`
-   tensor out of `model.safetensors`. The safetensors format is 8 bytes + a JSON
-   header + a flat buffer, so it is parsed in ~20 lines rather than by adding a
-   dependency for a one-off download.
+   tensor out of `model.safetensors`. Both files are vendored verbatim under
+   `vendor/potion-base-8M/` (30 MB, MIT, with checksums), so nothing is fetched
+   at train time in a checkout; `resolve()` still falls back to the Hub when they
+   are absent. The safetensors format is 8 bytes + a JSON header + a flat buffer,
+   so it is parsed in ~20 lines rather than by adding a dependency for a
+   one-off download.
 2. **Keep what the tokenizer can emit.** The word list is inherited wholesale
    from a WordPiece tokenizer, so it still contains 5,828 `##`-prefixed
    continuations and the five `[PAD] [UNK] [CLS] [SEP] [MASK]` specials. A run
@@ -542,17 +547,20 @@ of these files drives `JevDecide`, `evaluate.py` and `demo.py` unchanged.
   the pretrained semantics and the corpus glue both survive. Nothing about that
   breaks the tokenizer or the graph.
 
-Reproduce:
+Reproduce — all three models and their vocabularies are already committed, so
+only the last two commands are needed to see the table again:
 
 ```bash
-python -m jev_onnx.train       --max-rows 120000 --epochs 3
-python -m jev_onnx.train_potion --max-rows 120000 --epochs 3
-python -m jev_onnx.train_potion --max-rows 120000 --epochs 3 \
-       --init random --name jev_potion_randinit      # the control
 python compare.py --models artifacts/jev.onnx \
     artifacts_potion/jev_potion.onnx \
     artifacts_potion/jev_potion_randinit.onnx
 python scripts/probe_potion_coverage.py              # the coverage numbers
+
+# ...and to rebuild them from scratch (about 50 minutes each on an M1 Max):
+python -m jev_onnx.train       --max-rows 120000 --epochs 3
+python -m jev_onnx.train_potion --max-rows 120000 --epochs 3
+python -m jev_onnx.train_potion --max-rows 120000 --epochs 3 \
+       --init random --name jev_potion_randinit      # the control
 ```
 
 ---
@@ -616,7 +624,18 @@ tests/
   test_potion.py             table/vocabulary alignment, same-graph guarantee
   test_data.py               corpus text enumeration and vocabulary coverage
 scripts/                     probes that document why the code is shaped this way
+vendor/
+  potion-base-8M/    upstream static vectors, verbatim. See its README for
+                     checksums and license. `resolve()` prefers this directory
+                     and falls back to the Hub
+artifacts/                   the exported .onnx files and vocabularies
+artifacts_potion/
 ```
+
+The `.onnx` files, their `vocab.json` side-cars and the upstream potion vectors
+are all committed, so a fresh clone can run `python compare.py`, `python main.py`
+and `python demo.py` with no training and no download. Retrain them with the
+commands above; nothing in the tree depends on them being present.
 
 96 tests, ~9 seconds:
 
